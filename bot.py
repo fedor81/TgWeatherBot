@@ -1,9 +1,9 @@
-from config import bot
 from sqliter import sqliter
-
+from config import TOKEN
+import telebot
 
 db = sqliter('database.db')
-
+bot = telebot.TeleBot(TOKEN)
 
 if __name__ == '__main__':
-    bot.polling()
+    bot.infinity_polling()

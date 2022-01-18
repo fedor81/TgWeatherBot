@@ -1,7 +1,4 @@
 import requests
-import enchant
-
-d = enchant.Dict("ru_RU")
 
 
 def get_weather(city, open_weather_token):  # Присылает погоду в городе в виде строки
@@ -38,15 +35,3 @@ def get_weather(city, open_weather_token):  # Присылает погоду в
     except:
         return False
 
-
-def subscribe_step1(message, bot, token):
-    if message.text.lower() != 'отмена':
-        if get_weather(message.text, token):
-            return message.text
-        bot.register_next_step_handler(subscribe_step1(message, bot, token))
-    else:
-        return False
-
-
-def subscribe_step2(message, bot):
-    bot.send

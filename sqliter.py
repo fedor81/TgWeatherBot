@@ -16,8 +16,8 @@ class sqliter:
         result = self.cursor.execute(f"SELECT id FROM {table} WHERE id = (?)", (id,))
         return bool(len(result.fetchall()))
 
-    def add_notice(self, id, city, time):
-        self.cursor.execute("INSERT INTO records (id, notice, city, msc_time) VALUES (?, ?, ?, ?)", (id, 1, city, time))
+    def add_notice(self, id, city):
+        self.cursor.execute("INSERT INTO records (id, notice, city) VALUES (?, ?, ?)", (id, 0, city))
         self.conn.commit()
 
     def notice_update(self, id, **args):      # Принимает id и словарь
