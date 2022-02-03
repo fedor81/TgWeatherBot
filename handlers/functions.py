@@ -1,7 +1,7 @@
 import requests
 
 
-def get_weather(city, open_weather_token):  # Присылает погоду в городе в виде строки
+def get_weather(city, open_weather_token, check=False):  # Присылает погоду в городе в виде строки
     code_to_smile = {
         "Clear": "Ясно \U00002600",
         "Clouds": "Облачно \U00002601",
@@ -21,6 +21,9 @@ def get_weather(city, open_weather_token):  # Присылает погоду в
         city = data["name"]
         cur_weather = data["main"]["temp"]
 
+        if check:
+            return city
+
         weather_description = data["weather"][0]["main"]
         if weather_description in code_to_smile:
             wd = code_to_smile[weather_description]
@@ -35,3 +38,6 @@ def get_weather(city, open_weather_token):  # Присылает погоду в
     except:
         return False
 
+
+if __name__ == "__main__":
+    pass
