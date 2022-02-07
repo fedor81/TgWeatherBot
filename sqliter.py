@@ -18,22 +18,15 @@ class sqliter:
 
     def get_user_info(self, id):       # Получение информации о юзере
         res = self.cursor.execute(f"SELECT * FROM records WHERE id = (?)", (id,)).fetchone()
-        return {'id':res[0], 'notice':res[1], 'city':res[2], 'server_time':res[3], 'local_time':res[4], 'UTC':res[5]}
+        return {'id':res[0], 'notice':res[1], 'city':res[2], 'server_time':res[3], 'local_time':res[4]}
 
-    def add_notice(self, id, city, server_time, UTC):     # Добавляет запись в records
-        self.cursor.execute("INSERT INTO records (id, city, server_time, UTC) VALUES (?, ?, ?, ?)", (id, city, server_time, UTC))
+    def add_notice(self, id, city, server_time):     # Добавляет запись в records
+        self.cursor.execute("INSERT INTO records (id, city, server_time) VALUES (?, ?, ?)", (id, city, server_time))
         self.conn.commit()
 
     def notice_update(self, id, arg):      # Принимает id и словарь
         self.cursor.execute(f"UPDATE records SET {arg[0]} = (?) WHERE id = (?)", (arg[1], id,))
         self.conn.commit()
-
-    def remake_city(self, text):
-        result = self.cursor.execute("SELECT city_name FROM city_tz").fetchall()
-        for i in result:
-            print(i)
-            if tanimoto(text, i) >= 70:
-                return
 
     def tanimoto(self, s1, s2):
         a, b, c = len(s1), len(s2), 0.0
