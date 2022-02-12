@@ -1,10 +1,14 @@
-from telebot import types
-from datetime import datetime, timedelta
-from pytz import timezone
-import pytz
 from functions import get_weather
 from bot import bot, db
 from config import OWM_key
+
+from time import sleep
+from telebot import types
+from datetime import datetime, timedelta
+from pytz import timezone
+
+import pytz
+import threading
 
 
 fmt = '%H:%M'
@@ -153,6 +157,20 @@ def set_time(message, res):
         bot.register_next_step_handler(message, settings_notice, res)
 
 
+def sending_notification():
+    while True:
+        time = datetime.now(moscow).strftime(fmt)
+        res = db.check_time(time)
+        try:
+            for i in res:
+                w = get_weather(i[1], OWM_key)
+                bot.send_message(i[0], w)
+        except:
+            pass
+        sleep(60)
+
+
+
 def send_keyboard(message):     # Присылает юзеру клавиатуру
     bot.send_message(message.chat.id, 'Вот что я умею', reply_markup=main_keyboard)
 
@@ -174,7 +192,9 @@ def create_keyboard(*args):  # Создает markup клавиатуру
 main_keyboard = create_keyboard(['Погода сейчас', 'Какая погода в'], 'Настроить уведомление')
 notice_keyboard = create_keyboard(['Вкл', 'Выкл'], ['Город', 'Время'], 'Отмена')
 back_keyboard = create_keyboard('Отмена')
+mailing = threading.Thread(target=sending_notification)
 
 
 if __name__ == '__main__':
+    mailing.start()
     bot.infinity_polling()
