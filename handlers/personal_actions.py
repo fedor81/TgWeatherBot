@@ -13,7 +13,7 @@ moscow = timezone('Europe/Moscow')
 
 @bot.message_handler(commands=['start'])  # Команда /start
 def start(message):
-    if not db.user_exist('records', message.chat.id):
+    if not db.user_exist('users', message.chat.id):
         bot.send_message(message.chat.id, 'Введите название вашего населенного пункта')
         bot.register_next_step_handler(message, start_user_city)
     else:
@@ -23,14 +23,16 @@ def start(message):
 def start_user_city(message):     # определение города
     text = get_weather(message.text, OWM_key, True)
     if text:
-        local_time, server_time = get_city_zone(text)
-        db.add_notice(message.chat.id, message.text, server_time)
+        local_time, server_time = get_city_zone(text, 8, 0)
+        db.add_user(message.chat.id)
+        db.add_notice(message.chat.id, text, server_time, local_time)
+        send_keyboard(message)
     else:
         bot.send_message(message.chat.id, 'Не подходящий населенный пункт')
         bot.register_next_step_handler(message, start_user_city)
 
 
-def get_city_zone(city, hour=8, minute=0):
+def get_city_zone(city, hour, minute):      # Переводчик время в Московское
     chance = 0
     ci = None
 
@@ -42,6 +44,7 @@ def get_city_zone(city, hour=8, minute=0):
                 ci = i
         except IndexError:
             pass
+
     local_time = datetime.now(timezone(ci)).replace(hour=hour, minute=minute)
     server_time = local_time.astimezone(moscow)
     return local_time.strftime(fmt), server_time.strftime(fmt)
@@ -62,6 +65,9 @@ def text_detector(message):
         res = db.get_user_info(message.chat.id)
         send_settings(message, res, notice_keyboard)
         bot.register_next_step_handler(message, settings_notice, res)
+    elif text == 'погода сейчас':
+        w = get_weather(db.get_user_info(message.chat.id)['city'], OWM_key)
+        bot.send_message(message.chat.id, w)
     else:
         send_keyboard(message)
 
@@ -93,7 +99,9 @@ def settings_notice(message, res):  # Редактирует уведомлен�
             bot.register_next_step_handler(message, set_city, res)
             return
         elif text == 'время':
-            pass
+            bot.send_message(message.chat.id, 'Ведите время в формате часы:минуты.\nНапример: 8:00', reply_markup=back_keyboard)
+            bot.register_next_step_handler(message, set_time, res)
+            return
         res = db.get_user_info(message.chat.id)
         send_settings(message, res, None)
         bot.register_next_step_handler(message, settings_notice, res)
@@ -107,10 +115,10 @@ def set_city(message, res):
         if res['city'] != text:
             city = get_weather(text, OWM_key, True)
             if city:
-                local_time, server_time = get_city_zone(city, *[int(i) for i in res['local_time'].split(':')])
-                db.notice_update(message.chat.id, ('city', text))
+                local_time, server_time = get_city_zone(city, *list(map(int, res['local_time'].split(':'))))
+                db.notice_update(message.chat.id, ('city', city))
                 db.notice_update(message.chat.id, ('server_time', server_time))
-                res['city'], res['server_time'] = text, server_time
+                res['city'], res['server_time'] = city, server_time
                 send_settings(message, res, notice_keyboard)
                 bot.register_next_step_handler(message, settings_notice, res)
                 return
@@ -124,8 +132,24 @@ def set_city(message, res):
 def set_time(message, res):
     text = message.text.lower()
     if text != 'отмена':
-        pass
+        try:
+            new_time = list(map(int, text.split(':')))
+            last_time = list(map(int, res['local_time'].split(':')))
+            if new_time != last_time:
+                if new_time[0] < 24 and new_time[1] < 60:
+                    local_time, server_time = get_city_zone(res['city'], *new_time)
+                    db.notice_update(message.chat.id, ('server_time', server_time))
+                    db.notice_update(message.chat.id, ('local_time', local_time))
+                    res['local_time'], res['server_time'] = local_time, server_time
+                    send_settings(message, res, notice_keyboard)
+                    bot.register_next_step_handler(message, settings_notice, res)
+                    return
+        except:
+            pass
+        bot.send_message(message.chat.id, 'Не подходящее время')
+        bot.register_next_step_handler(message, res)
     else:
+        send_settings(message, res, notice_keyboard)
         bot.register_next_step_handler(message, settings_notice, res)
 
 
@@ -147,7 +171,7 @@ def create_keyboard(*args):  # Создает markup клавиатуру
     return markup
 
 
-main_keyboard = create_keyboard('Какая погода в', 'Настроить уведомление')
+main_keyboard = create_keyboard(['Погода сейчас', 'Какая погода в'], 'Настроить уведомление')
 notice_keyboard = create_keyboard(['Вкл', 'Выкл'], ['Город', 'Время'], 'Отмена')
 back_keyboard = create_keyboard('Отмена')
 
