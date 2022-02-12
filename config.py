@@ -1,2 +1,2 @@
-TOKEN = '5053466471:AAGJxtGDbK1MaDhwA_St-gJBMCaIVyW_Wlc'
-OWM_key = '0d8df6d26b0d3914b4093637442d53d7'
+TOKEN = ''
+OWM_key = ''
