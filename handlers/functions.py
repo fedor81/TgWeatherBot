@@ -37,7 +37,3 @@ def get_weather(city, open_weather_token, check=False):  # Присылает п
         return f"Погода в городе: {city}\nТемпература: {cur_weather}C° {wd}\nВлажность: {humidity}%\nДавление: {pressure} мм.рт.ст\nВетер: {wind} м/с\nХорошего дня!"
     except:
         return False
-
-
-if __name__ == "__main__":
-    pass

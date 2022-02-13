@@ -1,12 +1,11 @@
-from functions import get_weather
+from . functions import get_weather
 from bot import bot, db
 from config import OWM_key
 
-from time import sleep
+from datetime import datetime
 from telebot import types
-from datetime import datetime, timedelta
+from time import sleep
 from pytz import timezone
-
 import pytz
 import threading
 
@@ -54,11 +53,6 @@ def get_city_zone(city, hour, minute):      # Переводчик время в
     return local_time.strftime(fmt), server_time.strftime(fmt)
 
 
-@bot.message_handler(commands=['help'])  # Команда /help
-def message_help(message):
-    pass
-
-
 @bot.message_handler(content_types=['text'])  # Обработчик текста
 def text_detector(message):
     text = message.text.lower()
@@ -103,7 +97,7 @@ def settings_notice(message, res):  # Редактирует уведомлен�
             bot.register_next_step_handler(message, set_city, res)
             return
         elif text == 'время':
-            bot.send_message(message.chat.id, 'Ведите время в формате часы:минуты.\nНапример: 8:00', reply_markup=back_keyboard)
+            bot.send_message(message.chat.id, 'Ведите время(часы : минуты)', reply_markup=back_keyboard)
             bot.register_next_step_handler(message, set_time, res)
             return
         res = db.get_user_info(message.chat.id)
@@ -134,7 +128,7 @@ def set_city(message, res):
 
 
 def set_time(message, res):
-    text = message.text.lower()
+    text = message.text.lower().replace(' ', '')
     if text != 'отмена':
         try:
             new_time = list(map(int, text.split(':')))
@@ -157,7 +151,7 @@ def set_time(message, res):
         bot.register_next_step_handler(message, settings_notice, res)
 
 
-def sending_notification():
+def mailing():
     while True:
         time = datetime.now(moscow).strftime(fmt)
         res = db.check_time(time)
@@ -168,7 +162,6 @@ def sending_notification():
         except:
             pass
         sleep(60)
-
 
 
 def send_keyboard(message):     # Присылает юзеру клавиатуру
@@ -189,12 +182,16 @@ def create_keyboard(*args):  # Создает markup клавиатуру
     return markup
 
 
+def main():
+    notification = threading.Thread(target=mailing)
+    notification.start()
+    bot.infinity_polling()
+
+
 main_keyboard = create_keyboard(['Погода сейчас', 'Какая погода в'], 'Настроить уведомление')
 notice_keyboard = create_keyboard(['Вкл', 'Выкл'], ['Город', 'Время'], 'Отмена')
 back_keyboard = create_keyboard('Отмена')
-mailing = threading.Thread(target=sending_notification)
 
 
 if __name__ == '__main__':
-    mailing.start()
-    bot.infinity_polling()
+    main()
