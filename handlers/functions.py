@@ -1,4 +1,5 @@
 import requests
+import datetime
 
 
 def get_weather(city, open_weather_token, check=False):  # Присылает погоду в городе в виде строки
@@ -34,6 +35,6 @@ def get_weather(city, open_weather_token, check=False):  # Присылает п
         pressure = data["main"]["pressure"]
         wind = data["wind"]["speed"]
 
-        return f"Погода в городе: {city}\nТемпература: {cur_weather}C° {wd}\nВлажность: {humidity}%\nДавление: {pressure} мм.рт.ст\nВетер: {wind} м/с\nХорошего дня!"
+        return f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\nПогода в городе: {city}\nТемпература: {cur_weather}C° {wd}\nВлажность: {humidity}%\nДавление: {pressure} мм.рт.ст\nВетер: {wind} м/с\nХорошего дня!"
     except:
         return False
