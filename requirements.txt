@@ -1,7 +1,4 @@
-threading
 pytz
-time
 pyTelegramBotAPI
-DateTime
 requests
 sqlite3
