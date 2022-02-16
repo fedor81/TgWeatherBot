@@ -78,7 +78,7 @@ def weather(message):  # Присылает погоду
             bot.send_message(message.chat.id, w)
         else:
             bot.send_message(message.chat.id, 'Проверьте правильно ли вы написали название города')
-        bot.register_next_step_handler(message, weather)
+            bot.register_next_step_handler(message, weather)
     else:
         send_keyboard(message)
 
