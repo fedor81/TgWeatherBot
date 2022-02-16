@@ -1,7 +1,7 @@
 threading
 pytz
 time
-telebot
-datetime
+pyTelegramBotAPI
+DateTime
 requests
 sqlite3

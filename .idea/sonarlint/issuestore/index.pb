@@ -12,9 +12,3 @@ E
 :
 
 sqliter.py,3\3\339b6151ff9a4f397dc7285408c6776bc018bbfd
-8
-procfile,d\c\dc6098b2472e998076cb33db1a2088d5824a916a
-@
-requirements.txt,1\9\19359a61ae2446b51b549167b014da2fcf265768
-;
-runtime.txt,2\e\2ed4029984f4a6c70a541992efb31f76528bd80d
