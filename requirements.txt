@@ -1,4 +1,4 @@
-pytz
-pyTelegramBotAPI
-requests
-sqlite3
+pytz==2021.3
+pyTelegramBotAPI==4.4.0
+requests==2.27.1
+pysqlite3
