@@ -29,7 +29,7 @@ class sqliter:
         self.conn.commit()
 
     def check_time(self, time):
-        result = self.cursor.execute("SELECT id, city FROM records WHERE server_time = (?)", (time,)).fetchall()
+        result = self.cursor.execute("SELECT id, city FROM records WHERE server_time = (?) and notice = (?)", (time, 1)).fetchall()
         return result
 
     def tanimoto(self, s1, s2):
